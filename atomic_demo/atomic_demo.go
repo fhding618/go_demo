@@ -96,6 +96,22 @@ func swap_demo() {
 	fmt.Println(n)                                        // 456
 }
 
+// atomic.Value Demo
+// 对于可寻址的Value 值v，一旦v.Store被调用过，接下来的v.Store必须采用同样类型的参数作为参数，否则将会panic
+// 用nil作为参数也会导致panic
+func val_demo() {
+	type T struct {
+		a, b, c int
+	}
+	var ta = T{1, 2, 3}
+	var v atomic.Value
+	v.Store(ta)
+	var tb = v.Load().(T)
+	fmt.Println(tb)
+	fmt.Println(ta == tb)
+	v.Store("hello")
+}
+
 func main() {
-	swap_demo()
+	val_demo()
 }
