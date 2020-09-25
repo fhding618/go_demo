@@ -18,6 +18,25 @@ type ifaceWords struct {
 	data unsafe.Pointer
 }
 
+type Num struct {
+	i string
+	j int64
+}
+
+// 地址偏移计算
+func demo_01() {
+	n := Num{i: "EMPTY", j: 1}
+	nPointer := unsafe.Pointer(&n)
+
+	niPointer := (*string)(unsafe.Pointer(nPointer))
+	*niPointer = "中文"
+
+	njPointer := (*int64)(unsafe.Pointer(uintptr(nPointer) + unsafe.Offsetof(n.j)))
+	*njPointer = 2
+
+	fmt.Printf("%v\n", n)
+}
+
 func main() {
 	var num uint32 = 32
 	var numI interface{}
