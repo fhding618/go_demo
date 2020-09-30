@@ -26,7 +26,8 @@ func AB() string {
 }
 
 func main() {
-	a := []int{}
+	var s = "ab"
+	fmt.Printf("%d\n", len(s))
 
 	store := &Store{dbName: "ab"}
 	if store.config != nil {
