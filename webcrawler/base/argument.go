@@ -83,3 +83,53 @@ func (args *ChannelArgs) ItemChanLen() uint {
 func (args *ChannelArgs) ErrorChanLen() uint {
 	return args.errorChanLen
 }
+
+// 池基本参数容器描述模板
+var poolBaseArgsTemplate string = "{ pageDownloaderPoolSize: %d," +
+	" analyzerPoolSize: %d }"
+
+// 池基本参数类
+type PoolBaseArgs struct {
+	pageDownloaderPoolSize uint32 // 网页下载器池的尺寸
+	analyzerPoolSize       uint32 // 分析器池子尺寸
+	description            string // 描述
+}
+
+// 创建池基本参数类
+func NewPoolBaseArgs(
+	pageDownloaderPoolSize uint32,
+	analyzerPoolSize uint32) PoolBaseArgs {
+	return PoolBaseArgs{
+		pageDownloaderPoolSize: pageDownloaderPoolSize,
+		analyzerPoolSize:       analyzerPoolSize,
+	}
+}
+
+func (args *PoolBaseArgs) Check() error {
+	if args.pageDownloaderPoolSize == 0 {
+		return errors.New("The page downloader pool size can not be 0!\n")
+	}
+	if args.analyzerPoolSize == 0 {
+		return errors.New("The analyzer pool size can not be 0!\n")
+	}
+	return nil
+}
+
+func (args *PoolBaseArgs) String() string {
+	if args.description == "" {
+		args.description = fmt.Sprintf(poolBaseArgsTemplate,
+			args.pageDownloaderPoolSize,
+			args.analyzerPoolSize)
+	}
+	return args.description
+}
+
+// 获取网页下载器池子大小
+func (args *PoolBaseArgs) PageDownloaderPoolSize() uint32 {
+	return args.pageDownloaderPoolSize
+}
+
+// 获取分析器池子大小
+func (args *PoolBaseArgs) AnalyzerPoolSize() uint32 {
+	return args.analyzerPoolSize
+}
