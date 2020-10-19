@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./bufio_func"
+	"bufio_func"
 )
 
 func main() {
