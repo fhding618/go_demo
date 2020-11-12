@@ -1,0 +1,24 @@
+INFO: Monitor - Collected infomation[609]:
+ Goroutine number: 69
+ Scheduler: 
+	Running: true 
+	Channel args: { reqChanLen: 10, respChanLen: 10, itemChanLen: 10, errorChanLen: 10 } 
+	Pool base args: { pageDownloaderPoolSize: 3, analyzerPoolSize: 3 } 
+	Crawl depth: 1 
+	Channels manager: status: initialized, requestChannel: 0/10, responseChannel: 0/10, itemChannel: 0/10errorChannel: 0/10 
+	Request cache: status: running, length: 0, capacity: 3 
+	Downloader pool: 0/3 
+	Analyzer pool: 0/3
+	Item pipeline: failFast: true, processorNumber: 1, sent: 2832, accepted:2832, processed: 2832, processingNumber: 0 
+	Url(29): <concealed>
+	Stop sign: signed: false
+ Escaped time: 5.512221721s
+
+
+
+
+
+80402s
+
+442s
+

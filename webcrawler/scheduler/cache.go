@@ -1,9 +1,8 @@
-package schedule
+package scheduler
 
 import (
 	"fmt"
 	"sync"
-	"unicode"
 	"webcrawler/base"
 )
 
@@ -83,7 +82,7 @@ var summaryTemplate = "status: %s, " + "length: %d, " + "capacity: %d"
 
 func (rcache *reqCacheBySlice) summary() string {
 	summary := fmt.Sprintf(summaryTemplate,
-		rcache.status,
+		statusMap[rcache.status],
 		rcache.length(),
 		rcache.capacity())
 	return summary

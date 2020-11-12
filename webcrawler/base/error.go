@@ -2,7 +2,7 @@ package base
 
 import (
 	"bytes"
-	"golang.org/x/tools/go/ssa/interp/testdata/src/fmt"
+	"fmt"
 )
 
 // 错误类型

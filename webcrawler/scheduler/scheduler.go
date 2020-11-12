@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 	"sync/atomic"
 	"time"
 	anlz "webcrawler/analyzer"
-	base "webcrawler/base"
+	"webcrawler/base"
 	dl "webcrawler/downloader"
 	ipl "webcrawler/itempipeline"
 	mdw "webcrawler/middleware"
@@ -96,7 +95,6 @@ func (sched *myScheduler) Start(
 	if atomic.LoadUint32(&sched.running) == 1 {
 		return errors.New("The scheduler has been started!\n")
 	}
-	atomic.StoreUint32(&sched.running, 1)
 
 	if err := channelArgs.Check(); err != nil {
 		return err
@@ -146,6 +144,9 @@ func (sched *myScheduler) Start(
 
 	sched.reqCache = newRequestCache()
 	sched.urlMap = make(map[string]bool)
+
+	// 初始化完毕置 running 位
+	atomic.StoreUint32(&sched.running, 1)
 
 	sched.startDownloading()
 	sched.activateAnalyzers(respParsers)
@@ -373,21 +374,21 @@ func (sched *myScheduler) saveReqToCache(req base.Request, code string) bool {
 		log.Println("Ignore the request! It's URL is invalid!")
 		return false
 	}
-	if strings.ToLower(reqUrl.Scheme) != "http" {
-		log.Println("Ignore the request! It's url scheme '%s', but should be 'http'!\n", reqUrl.Scheme)
+	/*if strings.ToLower(reqUrl.Scheme) != "http" {
+		log.Printf("Ignore the request! It's url scheme '%s', but should be 'http'!\n", reqUrl.Scheme)
 		return false
-	}
+	}*/
 	if _, ok := sched.urlMap[reqUrl.String()]; ok {
-		log.Println("Ignore the request! It's url is repeated. (requestUrl=%s)\n", reqUrl)
+		log.Printf("Ignore the request! It's url is repeated. (requestUrl=%s)\n", reqUrl)
 		return false
 	}
 	if pd, _ := getPrimaryDomain(httpReq.Host); pd != sched.primayDomain {
-		log.Println("Ignore the request! It's host '%s' not in primary domain '%s'. (requestUrl=%s)\n",
+		log.Printf("Ignore the request! It's host '%s' not in primary domain '%s'. (requestUrl=%s)\n",
 			httpReq.Host, sched.primayDomain, reqUrl)
 		return false
 	}
 	if req.Depth() > sched.crawlDepth {
-		log.Println("Ignore the request! It's depth %d greater than %d. (requestUrl=%s)\n",
+		log.Printf("Ignore the request! It's depth %d greater than %d. (requestUrl=%s)\n",
 			req.Depth(), sched.crawlDepth, reqUrl)
 		return false
 	}
