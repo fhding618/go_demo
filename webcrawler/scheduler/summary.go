@@ -42,12 +42,14 @@ func NewSchedSummary(sched *myScheduler, prefix string) SchedSummary {
 	if urlCount > 0 {
 		var buffer bytes.Buffer
 		buffer.WriteByte('\n')
+		sched.rw.RLock()
 		for k, _ := range sched.urlMap {
 			buffer.WriteString(prefix)
 			buffer.WriteString(prefix)
 			buffer.WriteString(k)
 			buffer.WriteByte('\n')
 		}
+		sched.rw.RUnlock()
 		urlDetail = buffer.String()
 	} else {
 		urlDetail = "\n"

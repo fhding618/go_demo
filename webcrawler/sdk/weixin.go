@@ -1,4 +1,4 @@
-package wx
+package sdk
 
 import (
 	"encoding/json"
@@ -34,6 +34,10 @@ func NewWXClient() *wxClient {
 		appid:  appId,
 		appsec: appSec,
 	}
+}
+
+func (wx *wxClient) GetAppId() string {
+	return wx.appid
 }
 
 func (wx *wxClient) GetAccessToken() (*wxToken, error) {

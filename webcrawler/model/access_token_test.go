@@ -6,6 +6,7 @@ import (
 )
 
 func TestWXModel_GetAccessToken(t *testing.T) {
-	token, _ := NewWXModel().GetAccessToken()
-	fmt.Println(token)
+	token := NewAccessTokenModel()
+	access_token := token.GetAccessToken()
+	fmt.Println(access_token)
 }

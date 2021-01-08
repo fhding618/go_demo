@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"runtime"
 	"time"
+	"webcrawler/record"
 	sched "webcrawler/scheduler"
 )
 
@@ -22,10 +23,6 @@ var msgReachMaxIdleCount = "The scheduler has been idle for a period of time" +
 // 停止调度器的消息模板
 var msgStopScheduler = "Stop scheduler...%s."
 
-// 日志记录函数类型
-// 参数level代表日志级别。级别设定：0-普通 1-警告 2-错误
-type Record func(level byte, content string)
-
 // 调度器监控函数
 // 参数scheduler代表作为监控目标的调度器
 // 参数intervalNs代表检查间隔时间，单位：纳秒
@@ -40,7 +37,7 @@ func Monitoring(
 	maxIdleCount uint,
 	autoStop bool,
 	detailSummary bool,
-	record Record) <-chan uint64 {
+	record record.RecordFun) <-chan uint64 {
 	if scheduler == nil {
 		panic(errors.New("The scheduler is invalid!"))
 	}
@@ -77,7 +74,7 @@ func checkStatus(
 	maxIdleCount uint,
 	autoStop bool,
 	checkCountChan chan<- uint64,
-	record Record,
+	record record.RecordFun,
 	stopNotifer chan<- byte) {
 	var checkCount uint64
 	go func() {
@@ -136,7 +133,7 @@ func checkStatus(
 func recordSummary(
 	scheduler sched.Scheduler,
 	detailSummary bool,
-	record Record,
+	record record.RecordFun,
 	stopNotifier <-chan byte) {
 	go func() {
 		// 等待调度器开启
@@ -185,7 +182,7 @@ func recordSummary(
 // 接收和报告错误
 func reportError(
 	scheduler sched.Scheduler,
-	record Record,
+	record record.RecordFun,
 	stopNotifier <-chan byte) {
 	go func() {
 		// 等待调度器开启

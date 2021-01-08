@@ -1,4 +1,4 @@
-package wx
+package sdk
 
 import (
 	"fmt"

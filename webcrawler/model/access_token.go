@@ -4,11 +4,12 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	log "github.com/sirupsen/logrus"
+	"strings"
 	"time"
-	"webcrawler/base"
+	"webcrawler/sdk"
 )
 
-type WXModel struct {
+type AccessTokenModel struct {
 	gorm.Model
 	AppId       string `gorm:"column:app_id"`
 	appSecret   string
@@ -17,27 +18,43 @@ type WXModel struct {
 	ExpiresAt   time.Time
 }
 
-func NewWXModel() *WXModel {
-	return &WXModel{}
-}
-
-func (m *WXModel) TableName() string {
-	return "wx"
-}
-
-func (m *WXModel) GetAccessToken() (string, error) {
-	var wx WXModel
-	err := db.First(&wx, "app_id = ?", base.WX_APP_ID).Error
+func NewAccessTokenModel() *AccessTokenModel {
+	appId := sdk.NewWXClient().GetAppId()
+	token := new(AccessTokenModel)
+	err := db.First(token, "app_id = ?", appId).Error
 	if err != nil {
-		log.Errorf("DB_GetAccessToken: %v", err)
-		return "", err
+		log.Errorf("DB_NewAccessTokenModel: %v", err)
+		return nil
 	}
-	return wx.AccessToken, nil
+	return token
 }
 
-func (m *WXModel) updateAccessToken() error {
-	var wx WXModel
-	err := db.First(&wx, "app_id = ?", base.WX_APP_ID).Error
+func (tokene *AccessTokenModel) TableName() string {
+	return "access_token"
+}
+
+func (token *AccessTokenModel) GetAccessToken() string {
+	if token.isExpire() {
+		err := token.updateAccessToken()
+		if err != nil {
+			return ""
+		}
+	}
+	return token.AccessToken
+}
+
+func (token *AccessTokenModel) updateAccessToken() error {
+	wxToken, err := sdk.NewWXClient().GetAccessToken()
+	if err != nil {
+		return err
+	}
+	access_token := strings.TrimSpace(wxToken.Access_token)
+	expires_in := wxToken.Expires_in
+	expires_at := time.Now().Add(time.Duration(expires_in) * time.Second)
+
+	err = db.Model(token).Update("access_token", access_token).
+		Update("expires_at", expires_at).
+		Update("expires_in", expires_in).Error
 	if err != nil {
 		log.Errorf("DB_updateAccessToken: %v", err)
 		return err
@@ -46,10 +63,13 @@ func (m *WXModel) updateAccessToken() error {
 	return nil
 }
 
-func (m *WXModel) accessTokenIsExpire() bool {
-	if m.AccessToken == "" {
+func (token *AccessTokenModel) isExpire() bool {
+	if token.AccessToken == "" {
 		return true
 	}
 	now := time.Now()
-
+	if token.ExpiresAt.Before(now) {
+		return true
+	}
+	return false
 }

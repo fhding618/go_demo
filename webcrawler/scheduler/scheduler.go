@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sync"
 	"sync/atomic"
 	"time"
 	anlz "webcrawler/analyzer"
@@ -58,6 +59,7 @@ type Scheduler interface {
 
 // 实现类
 type myScheduler struct {
+	rw           sync.RWMutex
 	channelArgs  base.ChannelArgs
 	poolBaseArgs base.PoolBaseArgs
 	crawlDepth   uint32
@@ -378,6 +380,10 @@ func (sched *myScheduler) saveReqToCache(req base.Request, code string) bool {
 		log.Printf("Ignore the request! It's url scheme '%s', but should be 'http'!\n", reqUrl.Scheme)
 		return false
 	}*/
+	// 解决urlMap并发读写问题
+	sched.rw.Lock()
+	defer sched.rw.Unlock()
+
 	if _, ok := sched.urlMap[reqUrl.String()]; ok {
 		log.Printf("Ignore the request! It's url is repeated. (requestUrl=%s)\n", reqUrl)
 		return false

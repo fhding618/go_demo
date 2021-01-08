@@ -7,12 +7,12 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 	"webcrawler/analyzer"
 	"webcrawler/base"
 	pipeline "webcrawler/itempipeline"
+	"webcrawler/record"
 	sched "webcrawler/scheduler"
 	"webcrawler/tool"
 )
@@ -30,6 +30,7 @@ func processItem(item base.Item) (result base.Item, err error) {
 	if _, ok := result["number"]; !ok {
 		result["number"] = len(result)
 	}
+	fmt.Printf("processResult: %v\n", result)
 	time.Sleep(10 * time.Millisecond)
 	return result, nil
 }
@@ -102,34 +103,6 @@ func genHttpClient() *http.Client {
 	return &http.Client{}
 }
 
-func record(level byte, content string) {
-	if content == "" {
-		return
-	}
-	logFile := "webcrawler.log"
-	if _, err := os.Stat(logFile); os.IsNotExist(err) {
-		_, err := os.Create(logFile)
-		if err != nil {
-			panic("Create log file failed")
-		}
-	}
-
-	f, err := os.OpenFile(logFile, os.O_WRONLY, 0600)
-	if err != nil {
-		panic("Open log file failed")
-	}
-	defer f.Close()
-
-	switch level {
-	case 0:
-		f.WriteString(fmt.Sprintf("INFO: %s\n", content))
-	case 1:
-		f.WriteString(fmt.Sprintf("WARN: %s\n", content))
-	case 2:
-		f.WriteString(fmt.Sprintf("ERR: %s\n", content))
-	}
-}
-
 // 获得响应解析函数的序列
 func getResponseParsers() []analyzer.ParseResponse {
 	parsers := []analyzer.ParseResponse{
@@ -153,6 +126,7 @@ func main() {
 	// 准备监控参数
 	intervalNs := 10 * time.Millisecond
 	maxIdleCount := uint(1000)
+	rec := record.NewRecord(record.FILE_RECORD_TYPZ)
 	// 开始监控
 	checkCountChan := tool.Monitoring(
 		scheduler,
@@ -160,7 +134,7 @@ func main() {
 		maxIdleCount,
 		true,
 		false,
-		record)
+		rec.Record)
 
 	// 准备启动参数
 	channelArgs := base.NewChannelArgs(10, 10, 10, 10)
